@@ -1,0 +1,270 @@
+// System_Demo_CS0003_Finals.cpp : This file contains the 'main' function. Program execution begins and ends there.
+//
+
+#include <iostream>
+#include <iomanip>
+#include <cstdlib>
+#include <ctime>
+#include <string>
+#include <conio.h>
+
+#define repeat(a, x) for(int i = 0; i<=x; i++){ cout << a;}
+
+using namespace std;
+
+const int MAX_STUDENTS = 50;
+
+// Function prototypes
+bool enterTeacherInfo(string& teacherName, string& className, string& subject);
+bool enterStudentInfo(string names[], int grades[], int& numStudents);
+void calculateStats(int grades[], int numStudents);
+char calculateClassRank(int grades[], int numStudents);
+char calculateAverage(int num);
+void assignStudentNumbers(int studentNumbers[], int numStudents);
+void displayClassStats(int studentNumbers[], int grades[], string names[], int numStudents);
+
+int main() {
+    string teacherName, className, subject;
+    string names[MAX_STUDENTS];
+    int grades[MAX_STUDENTS];
+    int studentNumbers[MAX_STUDENTS];
+    int numStudents = 0;
+
+    // Function calls
+    bool teacherInfoEntered = enterTeacherInfo(teacherName, className, subject);
+
+    if (!teacherInfoEntered) {
+        cout << "Exiting program due to invalid input. Please restart and try again." << endl;
+        return 1; // Exit with an error code
+    }
+
+    system("cls");
+
+    srand(static_cast<unsigned int>(time(0))); // Seed for randomization
+
+    int choice;
+    int checker = studentNumbers[0];
+    do {
+        cin.clear();
+        cout << "Welcome, " << teacherName << " of " << className << ", please choose one! " << endl;
+        repeat('*', 119) cout << endl;
+        repeat('\t', 5) cout << "------ Menu ------" << endl;
+        repeat('\t', 4) cout << "1. Enter student information" << endl; 
+        repeat('\t', 4) cout << "2. Calculate class statistics" << endl; 
+        repeat('\t', 4) cout << "3. Calculate class rank" << endl; 
+        repeat('\t', 4) cout << "4. Assign student numbers" << endl; 
+        repeat('\t', 4) cout << "5. Display Class" << endl; 
+        repeat('\t', 4) cout << "6. Exit" << endl; 
+        repeat('*', 119)
+
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+        case 1:
+            system("cls");
+            enterStudentInfo(names, grades, numStudents);
+            break;
+        case 2:
+            system("cls");
+            if (empty(names[0])) {
+                cout << "This option is invalid until students have been inputted into the system!";
+                break;
+            }
+            
+            repeat('*', 119)
+            calculateStats(grades, numStudents);
+            repeat('*', 119)
+            break;
+        case 3: {
+            system("cls");
+            if (empty(names[0])) {
+                cout << "This option is invalid until students have been inputted into the system!";
+                break;
+            }
+            
+            repeat('*', 119)
+            cout << "The ranking of all average grades in the class is -" << endl;
+            char classRank = calculateClassRank(grades, numStudents);
+            cout << "Class Rank: " << classRank << endl;
+            repeat('*', 119)
+            break;
+        }
+        case 4:
+            system("cls");
+            if (empty(names[0])) {
+                cout << "This option is invalid until students have been inputted into the system!";
+                break;
+            }
+
+            assignStudentNumbers(studentNumbers, numStudents);
+            break;
+        case 5:
+            system("cls");
+            if (empty(names[0])) {
+                cout << "This option is invalid until students have been inputted into the system!";
+                break;
+            }
+            if (studentNumbers[0] == checker) {
+                cout << "This option is invalid until student numbers have been assigned to the students!";
+                break;
+            }
+            cout << "The class of " << className << " taught by " << teacherName << " of the course " << subject << " has the following stats: " << endl;
+            displayClassStats(studentNumbers, grades, names, numStudents);
+            break;
+        case 6:
+            cout << "Exiting program. Thank you!" << endl;
+            break;
+        default:
+            cout << "Invalid choice. Please try again." << endl;
+            // Clear the input buffer in case of invalid input
+            cin.clear();
+            while (cin.get() != '\n')
+                continue;
+        }
+        cout << "\nPress any key to continue...\n";
+        _getch();
+        system("cls");
+
+    } while (choice != 6);
+
+    return 0;
+}
+
+bool enterTeacherInfo(string& teacherName, string& className, string& subject) {
+    cout << "Enter teacher name: ";
+    
+    getline(cin, teacherName);
+    //cin.ignore(); // Clear the newline character from the input buffer
+    cout << "Enter class name: ";
+    getline(cin, className);
+    cout << "Enter subject: ";
+    getline(cin, subject);
+
+    // Basic validation, ensuring that strings are not empty
+
+    return !teacherName.empty() && !className.empty() && !subject.empty();
+}
+
+bool enterStudentInfo(string names[], int grades[], int& numStudents) {
+    cout << "Enter the number of students: ";
+    cin >> numStudents;
+
+    if (numStudents <= 0 || numStudents > MAX_STUDENTS) {
+        cout << "Invalid number of students. Please enter a positive number less than or equal to " << MAX_STUDENTS << endl;
+        return false;
+    }
+
+    cin.ignore(); // Clear the newline character from the input buffer
+    //fill(names, names + 50, NULL);
+    int i = 0;
+    do{
+        //cin.ignore();
+        cout << "Enter name of student " << i + 1 << ": ";
+        getline(cin, names[i]);
+        cout << "Enter grade for student (Grades below 0 or above 100 are invalid) " << i + 1 << ": ";
+        cin >> grades[i];
+        if (grades[i] < 0 || grades[i] > 100 || cin.fail()) {
+            cout << "Invalid input! Try again!" << endl;
+            cin.clear(); //clears the error
+            cin.ignore(numeric_limits<streamsize>::max(), '\n'); //clears the newline buffer when enter is pressed
+            continue;
+        }
+        cin.ignore();
+        i++; 
+    }while(i < numStudents);
+
+    return true;
+}
+
+void calculateStats(int grades[], int numStudents) {
+    int sum = 0;
+    int minGrade = grades[0];
+    int maxGrade = grades[0];
+
+    for (int i = 0; i < numStudents; ++i) {
+        sum += grades[i];
+
+        if (grades[i] < minGrade) {
+            minGrade = grades[i];
+        }
+
+        if (grades[i] > maxGrade) {
+            maxGrade = grades[i];
+        }
+    }
+
+    double average = static_cast<double>(sum) / numStudents;
+
+
+    cout << fixed << setprecision(2);
+    cout << "Average grade: " << average << endl;
+    cout << "Lowest grade: " << minGrade << endl;
+    cout << "Highest grade: " << maxGrade << endl;
+}
+
+char calculateAverage(int num) {
+    int average = num;
+    if (average >= 90) {
+        return 'A';
+    }
+    else if (average >= 80) {
+        return 'B';
+    }
+    else if (average >= 70) {
+        return 'C';
+    }
+    else if (average >= 60) {
+        return 'D';
+    }
+    else {
+        return 'F';
+    }
+}
+
+char calculateClassRank(int grades[], int numStudents) {
+    double average = static_cast<double>(0); // Initialize average to 0 to avoid errors
+
+    if (numStudents > 0) {
+        int sum = 0;
+        for (int i = 0; i < numStudents; ++i) {
+            sum += grades[i];
+        }
+        average = static_cast<double>(sum) / numStudents;
+    }
+
+    return calculateAverage(average);
+}
+
+void assignStudentNumbers(int studentNumbers[], int numStudents) {
+    cout << "Assigning student numbers randomly..." << endl;
+
+    for (int i = 0; i < numStudents; ++i) {
+        studentNumbers[i] = rand() % 1000 + 1;
+        cout << "Student " << i + 1 << ": " << studentNumbers[i] << endl;
+    }
+}
+
+void displayClassStats(int studentNumbers[], int grades[], string names[], int numStudents) {
+    repeat('*', 119);
+    for (int i = 0; i < numStudents; i++) {
+        cout << "Student Number: " << studentNumbers[i] << endl;
+        cout << names[i] << " has a grade of " << grades[i] << " with the ranking of: " << calculateAverage(grades[i]) << endl << endl;
+    }
+    repeat('*', 119);
+    calculateStats(grades, numStudents);
+    cout << "Average class rank: " << calculateClassRank(grades, numStudents) << endl;
+    repeat('*', 119);
+}
+
+
+// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
+// Debug program: F5 or Debug > Start Debugging menu
+
+// Tips for Getting Started: 
+//   1. Use the Solution Explorer window to add/manage files
+//   2. Use the Team Explorer window to connect to source control
+//   3. Use the Output window to see build output and other messages
+//   4. Use the Error List window to view errors
+//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
+//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
